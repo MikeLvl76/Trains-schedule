@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Header } from "./Header";
 
 export const Home = () => {
@@ -6,7 +7,7 @@ export const Home = () => {
       <Header />
       <div>
         <h1>Welcome to the app !</h1>
-        <button onClick={() => console.log("Clicked !")}>View schedules</button>
+        <Link to='/schedules'><button>View schedules</button></Link>
       </div>
     </>
   );

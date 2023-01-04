@@ -3,12 +3,14 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Home } from "./Home";
 import reportWebVitals from "./reportWebVitals";
+import { Schedules } from "./Schedules";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <BrowserRouter>
     <Routes>
-      <Route index element={<Home />} />
+      <Route path='/' element={<Home />} />
+      <Route path='/schedules' element={<Schedules />} />
     </Routes>
   </BrowserRouter>
 );
