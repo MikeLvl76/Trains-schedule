@@ -23,12 +23,36 @@ const fetchFromAPI = async (
   return await response.json();
 };
 
+const formatTime = (time) => {
+  const split = time.split("T");
+  const d = `${split[0].substring(0, 4)}/${split[0].substring(
+    4,
+    6
+  )}/${split[0].substring(6)}`;
+  const t = `${split[1].substring(0, 2)}:${split[1].substring(
+    2,
+    4
+  )}:${split[1].substring(4)}`;
+  return `${d} ${t}`;
+};
+
 export const Schedules = () => {
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [stopAreas, setStopAreas] = useState([]);
   const [stopArea, setStopArea] = useState("");
   const [arrivalsChecked, setArrivalsChecked] = useState(false);
   const [departuresChecked, setDeparturesChecked] = useState(false);
   const [travelStatus, setTravelStatus] = useState(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const split = new Date().toLocaleString("fr-FR").split(" ");
+      setDate(split[0]);
+      setTime(split[1]);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -67,7 +91,6 @@ export const Schedules = () => {
   }, [stopArea, arrivalsChecked, departuresChecked]);
 
   const renderArrivals = () => {
-    console.log("TRAVEL:", travelStatus);
     return (
       <>
         {travelStatus.arrivals ? (
@@ -81,21 +104,10 @@ export const Schedules = () => {
             </thead>
             <tbody>
               {travelStatus.arrivals.map((v, i) => {
-                const formatTime = (time) => {
-                  const split = time.split("T")[0];
-                  return `${split.substring(0, 4)}-${split.substring(
-                    4,
-                    6
-                  )}-${split.substring(6)}`;
-                };
                 return (
                   <tr key={i}>
-                    <td>{v.route.direction.name}</td>
-                    <td>
-                      {new Date(
-                        formatTime(v.stop_date_time.arrival_date_time)
-                      ).toLocaleString("fr-FR")}
-                    </td>
+                    <td>{v.display_informations.direction}</td>
+                    <td>{formatTime(v.stop_date_time.arrival_date_time)}</td>
                     <td>{v.route.line.commercial_mode.name}</td>
                   </tr>
                 );
@@ -122,21 +134,10 @@ export const Schedules = () => {
             </thead>
             <tbody>
               {travelStatus.departures.map((v, i) => {
-                const formatTime = (time) => {
-                  const split = time.split("T")[0];
-                  return `${split.substring(0, 4)}-${split.substring(
-                    4,
-                    6
-                  )}-${split.substring(6)}`;
-                };
                 return (
                   <tr key={i}>
-                    <td>{v.route.direction.name}</td>
-                    <td>
-                      {new Date(
-                        formatTime(v.stop_date_time.departure_date_time)
-                      ).toLocaleString("fr-FR")}
-                    </td>
+                    <td>{v.display_informations.direction}</td>
+                    <td>{formatTime(v.stop_date_time.departure_date_time)}</td>
                     <td>{v.route.line.commercial_mode.name}</td>
                   </tr>
                 );
@@ -175,12 +176,18 @@ export const Schedules = () => {
   return (
     <>
       <Header />
+      <head>
+        <title>Schedules</title>
+      </head>
+
       <h1>Welcome to Schedules page !</h1>
-      <h3>Area</h3>
+      <h2>Date : {date}</h2>
+      <h2>Current time: {time}</h2>
+      <h3>Pick a station</h3>
       <select onChange={validate}>
         <option>-- Choose an area --</option>
-        {stopAreas.map((v) => (
-          <option value={v.id} key={stopAreas.indexOf(v)}>
+        {stopAreas.map((v, i) => (
+          <option value={v.id} key={i}>
             {v.name}
           </option>
         ))}
