@@ -25,11 +25,10 @@ const fetchFromAPI = async (
 
 export const Schedules = () => {
   const [stopAreas, setStopAreas] = useState([]);
-  const [stopArea, setStopArea] = useState();
-  const [arrivalsChecked, setArrivalsChecked] = useState(true);
+  const [stopArea, setStopArea] = useState("");
+  const [arrivalsChecked, setArrivalsChecked] = useState(false);
   const [departuresChecked, setDeparturesChecked] = useState(false);
-  const [arrivals, setArrivals] = useState('');
-  const [departures, setDepartures] = useState('');
+  const [travelStatus, setTravelStatus] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -49,41 +48,126 @@ export const Schedules = () => {
 
   useEffect(() => {
     (async () => {
-      const data = await fetchFromAPI(undefined, undefined, stopArea + "/");
-      console.log(data);
-    })();
-  }, [stopArea]);
-
-  useEffect(() => {
-    (async () => {
       if (stopArea) {
-        if (arrivalsChecked) {
-          const data = await fetchFromAPI(
-            undefined,
-            undefined,
-            stopArea + "/arrivals?"
-          );
-          setArrivals(data.arrivals.toString());
-        }
-
-        if (departuresChecked) {
-          const data = await fetchFromAPI(
-            undefined,
-            undefined,
-            stopArea + "/departures?"
-          );
-          setDepartures(data.departures.toString());
-        }
-
+        const data = await fetchFromAPI(
+          undefined,
+          undefined,
+          stopArea +
+            "/" +
+            (arrivalsChecked
+              ? "arrivals?"
+              : departuresChecked
+              ? "departures"
+              : "")
+        );
+        setTravelStatus(data);
+        console.log(data);
       }
     })();
   }, [stopArea, arrivalsChecked, departuresChecked]);
+
+  const renderArrivals = () => {
+    console.log("TRAVEL:", travelStatus);
+    return (
+      <>
+        {travelStatus.arrivals ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Arrival</th>
+                <th>Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {travelStatus.arrivals.map((v, i) => {
+                const formatTime = (time) => {
+                  const split = time.split("T")[0];
+                  return `${split.substring(0, 4)}-${split.substring(
+                    4,
+                    6
+                  )}-${split.substring(6)}`;
+                };
+                return (
+                  <tr key={i}>
+                    <td>{v.route.direction.name}</td>
+                    <td>
+                      {new Date(
+                        formatTime(v.stop_date_time.arrival_date_time)
+                      ).toLocaleString("fr-FR")}
+                    </td>
+                    <td>{v.route.line.commercial_mode.name}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : null}
+      </>
+    );
+  };
+
+  const renderDepartures = () => {
+    console.log("TRAVEL:", travelStatus);
+    return (
+      <>
+        {travelStatus.departures ? (
+          <table>
+            <thead>
+              <tr>
+                <th>Direction</th>
+                <th>Departure</th>
+                <th>Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {travelStatus.departures.map((v, i) => {
+                const formatTime = (time) => {
+                  const split = time.split("T")[0];
+                  return `${split.substring(0, 4)}-${split.substring(
+                    4,
+                    6
+                  )}-${split.substring(6)}`;
+                };
+                return (
+                  <tr key={i}>
+                    <td>{v.route.direction.name}</td>
+                    <td>
+                      {new Date(
+                        formatTime(v.stop_date_time.departure_date_time)
+                      ).toLocaleString("fr-FR")}
+                    </td>
+                    <td>{v.route.line.commercial_mode.name}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : null}
+      </>
+    );
+  };
 
   const validate = (event) => {
     setStopArea(event.target.value);
   };
 
-  const handleChange = () => {
+  const changeArrivalsChecked = () => {
+    if (!arrivalsChecked && !departuresChecked) {
+      setArrivalsChecked(true);
+      return;
+    }
+
+    setArrivalsChecked(!arrivalsChecked);
+    setDeparturesChecked(!departuresChecked);
+  };
+
+  const changeDeparturesChecked = () => {
+    if (!arrivalsChecked && !departuresChecked) {
+      setDeparturesChecked(true);
+      return;
+    }
+
     setArrivalsChecked(!arrivalsChecked);
     setDeparturesChecked(!departuresChecked);
   };
@@ -101,13 +185,13 @@ export const Schedules = () => {
           </option>
         ))}
       </select>
-      {stopArea && (
+      {stopArea ? (
         <div>
           <label>
             <input
               type="checkbox"
               checked={arrivalsChecked}
-              onChange={handleChange}
+              onChange={changeArrivalsChecked}
             />
             Arrivals
           </label>
@@ -115,14 +199,19 @@ export const Schedules = () => {
             <input
               type="checkbox"
               checked={departuresChecked}
-              onChange={handleChange}
+              onChange={changeDeparturesChecked}
             />
             Departures
           </label>
         </div>
-      )}
-      <p>1: {arrivals}</p>
-      <p>2: {departures}</p>
+      ) : null}
+      {stopArea
+        ? arrivalsChecked
+          ? renderArrivals()
+          : departuresChecked
+          ? renderDepartures()
+          : null
+        : null}
     </>
   );
 };
