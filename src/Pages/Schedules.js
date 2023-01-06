@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Header } from "../Header";
+import { Header } from "../Components/Header";
 import { Travel } from "../Components/Travel";
 
 const fetchFromAPI = async (
@@ -24,7 +24,7 @@ const fetchFromAPI = async (
   return await response.json();
 };
 
-const formatTime = (time) => {
+const formatDateTime = (time) => {
   const split = time.split("T");
   const d = `${split[0].substring(0, 4)}/${split[0].substring(
     4,
@@ -78,10 +78,10 @@ export const Schedules = () => {
           undefined,
           undefined,
           stopArea +
-          "/" +
-          (arrivalsChecked
-            ? "arrivals?"
-            : departuresChecked
+            "/" +
+            (arrivalsChecked
+              ? "arrivals?"
+              : departuresChecked
               ? "departures"
               : "")
         );
@@ -117,11 +117,10 @@ export const Schedules = () => {
 
   return (
     <>
-      <Header />
       <head>
         <title>Schedules</title>
       </head>
-
+      <Header />
       <h1>Welcome to Schedules page !</h1>
       <h2>Date : {date}</h2>
       <h2>Current time: {time}</h2>
@@ -154,31 +153,27 @@ export const Schedules = () => {
           </label>
         </div>
       ) : null}
-      {stopArea
-        ? arrivalsChecked && travelStatus.arrivals
-          ? <Travel
-            labels={['Direction', 'Arrival', 'Mode']}
-            values={travelStatus.arrivals.map(v =>
-              [
-                v.display_informations.direction,
-                formatTime(v.stop_date_time.arrival_date_time),
-                v.route.line.commercial_mode.name
-              ]
-            )}
+      {stopArea ? (
+        arrivalsChecked && travelStatus.arrivals ? (
+          <Travel
+            labels={["Direction", "Arrival", "Mode"]}
+            values={travelStatus.arrivals.map((v) => [
+              v.display_informations.direction,
+              formatDateTime(v.stop_date_time.arrival_date_time),
+              v.route.line.commercial_mode.name,
+            ])}
           />
-          : departuresChecked && travelStatus.departures
-            ? <Travel
-              labels={['Direction', 'Departure', 'Mode']}
-              values={travelStatus.departures.map(v =>
-                [
-                  v.display_informations.direction,
-                  formatTime(v.stop_date_time.departure_date_time),
-                  v.route.line.commercial_mode.name
-                ]
-              )}
-            />
-            : null
-        : null}
+        ) : departuresChecked && travelStatus.departures ? (
+          <Travel
+            labels={["Direction", "Departure", "Mode"]}
+            values={travelStatus.departures.map((v) => [
+              v.display_informations.direction,
+              formatDateTime(v.stop_date_time.departure_date_time),
+              v.route.line.commercial_mode.name,
+            ])}
+          />
+        ) : null
+      ) : null}
     </>
   );
 };
