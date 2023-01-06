@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Home } from "./Home";
 import reportWebVitals from "./reportWebVitals";
-import { Schedules } from "./Schedules";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Home } from "./Pages/Home";
+import { Schedules } from "./Pages/Schedules";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
